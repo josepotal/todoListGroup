@@ -1,0 +1,14 @@
+extends layout
+block content
+  a(href='/deleteAllCompleted')
+    button.btn.btn-danger(type='button') Delete all!!
+  ul.list-group
+    each task in auxTasks
+      li(id= task.id, class="list-group-item")
+        span(style="text-decoration: line-through")= ++counter + '.\t' +task.body
+        div.pull-right(style="display: inline")
+          a(href="/completed/delete/" + task.id)
+            span.glyphicon.glyphicon-remove(style="color: red")
+        p(style="color: #92928f")= task.completionDate
+  if !auxTasks.length
+    h3 No tasks completed yet
