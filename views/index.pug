@@ -1,5 +1,6 @@
 extends layout
 block content
+  h4= message
   form.form-inline(action='/add', method='POST', role='form')
     a(href="/completedAll")
       button.btn.btn-success(type='button') All done    

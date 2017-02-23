@@ -2,7 +2,8 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const fs = require('fs')
-const fileName = './src/data/tasks.json'
+const jsonfile = require('jsonfile')
+
 
 app.use(express.static('public'))
 // parse application/x-www-form-urlencoded
@@ -12,16 +13,25 @@ app.use(bodyParser.json())
 
 app.set('view engine', 'pug')
 
-let tasks = require('./src/data/tasks.json')
+
+//ROUTES
+const deleteRoutes = require('./app/routes-delete.js')
+
+
+const fileName = './src/data/tasks.json'
+let tasks = jsonfile.readFileSync(fileName)
+var message=""
 
 // TASK LIST METHODS
 app.get('/', (req, res) => {
+  tasks = tasks;
   const title = 'Tasks List'
   let counter = 0
+  let message = ''
   let auxTasks = tasks.filter(elem => {
     return !elem.completionDate
   })
-  res.render('index', {title, auxTasks, counter})
+  res.render('index', {title, auxTasks, counter, message})
 })
 
 app.post('/add', (req, res) => {
@@ -37,28 +47,30 @@ app.post('/add', (req, res) => {
     body: bodyTask,
     creationDate: `Created on ${day} / ${month + 1} / ${year} at ${h}:${m}`,
     completionDate: ''
-  }
-  tasks.push(newTask)
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
-    if (err) return console.log(err)
-  })
-  res.redirect('/')
-})
+  };
+  tasks.push(newTask);
+  jsonfile.writeFile(fileName, tasks, {spaces: 2}, function (err) {
+    if (err) return console.log(err);
+  });
+  res.redirect('/');
+});
 
 // DELETE
-app.get('/delete/:id', (req, res) => {
-  let id = req.params.id
-  tasks = tasks.filter(elem => elem.id !== id)
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
-    if (err) return console.log(err)
-  })
-  res.redirect('/')
-})
+app.use( '/delete', deleteRoutes)
+// app.get('/delete/:id', (req, res) => {
+//   let id = req.params.id
+//   let message = "Item removed"
+//   tasks = tasks.filter(elem => elem.id !== id)
+//   jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
+//     if (err) return console.log(err)
+//   })
+//   res.redirect('/')
+// })
 
 app.get('/completed/delete/:id', (req, res) => {
   let id = req.params.id
   tasks = tasks.filter(elem => elem.id !== id)
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
+  jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
     if (err) return console.log(err)
   })
   res.redirect('/completed')
@@ -70,7 +82,7 @@ app.get('/completed/:id', (req, res) => {
   tasks.map(task => {
     if (task.id === id) task.completionDate = 'Completed on ' + new Date()
   })
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
+  jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
     if (err) return console.log(err)
   })
   res.redirect('/')
@@ -81,7 +93,7 @@ app.get('/completedAll', (req, res) => {
   tasks.map(task => {
     task.completionDate = 'Completed on ' + new Date()
   })
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
+  jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
     if (err) return console.log(err)
   })
   res.redirect('/')
@@ -103,7 +115,7 @@ app.get('/deleteAllToDo', (req, res) => {
     return elem.completionDate
   })
   console.log(auxTasks)
-  fs.writeFile(fileName, JSON.stringify(auxTasks, null, 2), function (err) {
+  jsonfile.writeFile(fileName, auxTasks, {spaces:2}, function (err) {
     if (err) return console.log(err)
   })
   res.redirect('/')
@@ -115,7 +127,7 @@ app.get('/deleteAllCompleted', (req, res) => {
     return !elem.completionDate
   })
 
-  fs.writeFile(fileName, JSON.stringify(tasks, null, 2), function (err) {
+  jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
     if (err) return console.log(err)
   })
   res.redirect('/completed')
