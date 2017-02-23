@@ -15,16 +15,20 @@ app.set('view engine', 'pug')
 
 
 //ROUTES
-const deleteRoutes = require('./app/routes-delete.js')
+const deleteTaskRoute = require('./app/route-delete-one-task.js')
+const deleteAllToDoRoute = require('./app/route-delete-alltodo.js')
+
+
+
+
 
 
 const fileName = './src/data/tasks.json'
 let tasks = jsonfile.readFileSync(fileName)
-var message=""
 
 // TASK LIST METHODS
 app.get('/', (req, res) => {
-  tasks = tasks;
+  tasks = jsonfile.readFileSync(fileName);
   const title = 'Tasks List'
   let counter = 0
   let message = ''
@@ -56,16 +60,10 @@ app.post('/add', (req, res) => {
 });
 
 // DELETE
-app.use( '/delete', deleteRoutes)
-// app.get('/delete/:id', (req, res) => {
-//   let id = req.params.id
-//   let message = "Item removed"
-//   tasks = tasks.filter(elem => elem.id !== id)
-//   jsonfile.writeFile(fileName, tasks, {spaces:2}, function (err) {
-//     if (err) return console.log(err)
-//   })
-//   res.redirect('/')
-// })
+app.use( '/delete', deleteTaskRoute)
+app.use('/deleteAllToDo', deleteAllToDoRoute )
+
+
 
 app.get('/completed/delete/:id', (req, res) => {
   let id = req.params.id
@@ -110,19 +108,19 @@ app.get('/completed', (req, res) => {
 })
 
 // DELETE ALL TODO LIST
-app.get('/deleteAllToDo', (req, res) => {
-  let auxTasks = tasks.filter(elem => {
-    return elem.completionDate
-  })
-  console.log(auxTasks)
-  jsonfile.writeFile(fileName, auxTasks, {spaces:2}, function (err) {
-    if (err) return console.log(err)
-  })
-  res.redirect('/')
-})
+// app.get('/delete/AllToDo', (req, res) => {
+//   let auxTasks = tasks.filter(elem => {
+//     return elem.completionDate
+//   })
+//   console.log(auxTasks)
+//   jsonfile.writeFile(fileName, auxTasks, {spaces:2}, function (err) {
+//     if (err) return console.log(err)
+//   })
+//   res.redirect('/')
+// })
 
 //DELETE ALL COMPLETED TASKS
-app.get('/deleteAllCompleted', (req, res) => {
+app.get('/delete/AllCompleted', (req, res) => {
   tasks = tasks.filter(elem => {
     return !elem.completionDate
   })
